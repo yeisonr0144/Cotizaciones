@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+pyodbc
+openpyxl
+python-multipart
+reportlab
+openpyxl
+python-multipart
+reportlab
