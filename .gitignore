@@ -35,3 +35,7 @@ __pycache__/
 **/__pycache__/
 *.pyc
 **/*.pyc
+
+# App runtime outputs
+backend/output/
+backend/uploads/
