@@ -1,3 +1,37 @@
 # Ignore Node.js dependencies
 node_modules/
 **/node_modules/
+
+# Ignore .NET build outputs
+[Bb]in/
+[Oo]bj/
+**/[Bb]in/
+**/[Oo]bj/
+
+# Ignore frontend build outputs
+/dist/
+**/dist/
+
+# Environment files
+.env
+**/.env
+
+# Logs and temp files
+*.log
+logs/
+*.tmp
+*.temp
+
+# OS / Editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+**/*.pyc
