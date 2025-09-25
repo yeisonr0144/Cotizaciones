@@ -30,6 +30,13 @@ function generatePdf({ procedimiento, materiales = [], manoDeObra = [], totales 
   doc.moveDown();
   doc.fontSize(12).text(`Nombre: ${procedimiento?.nombre ?? ''}`);
   doc.fontSize(12).text(`Descripción: ${procedimiento?.descripcion ?? ''}`);
+  // campos adicionales
+  if (procedimiento?.ubicacion) doc.fontSize(12).text(`Ubicación: ${procedimiento.ubicacion}`);
+  const tiempoStr = [procedimiento?.tiempoEstimado, procedimiento?.tiempoUnidad].filter(Boolean).join(' ');
+  if (tiempoStr) doc.fontSize(12).text(`Tiempo estimado: ${tiempoStr}`);
+  if (procedimiento?.dependencias) doc.fontSize(12).text(`Dependencias: ${procedimiento.dependencias}`);
+  if (procedimiento?.prioridad) doc.fontSize(12).text(`Prioridad/Fase: ${procedimiento.prioridad}`);
+  if (procedimiento?.notas) doc.fontSize(12).text(`Notas: ${procedimiento.notas}`);
   doc.moveDown(2);
 
   // Materiales
@@ -37,20 +44,45 @@ function generatePdf({ procedimiento, materiales = [], manoDeObra = [], totales 
     doc.fontSize(16).text('Materiales', { underline: true });
     doc.moveDown();
 
-    const top = doc.y; doc.fontSize(10);
-    doc.text('Descripción', 50, top, { width: 200 });
-    doc.text('Cantidad', 250, top, { width: 80 });
-    doc.text('Precio Unitario', 330, top, { width: 100 });
-    doc.text('Total', 430, top, { width: 80 });
-    doc.moveTo(50, top + 20).lineTo(530, top + 20).stroke();
+    const drawMaterialesHeader = () => {
+      const top = doc.y; doc.fontSize(10);
+      doc.text('Descripción', 50, top, { width: 200 });
+      doc.text('Cantidad', 250, top, { width: 80 });
+      doc.text('Precio Unitario', 330, top, { width: 100 });
+      doc.text('Total', 430, top, { width: 80 });
+      doc.moveTo(50, top + 20).lineTo(530, top + 20).stroke();
+      return top + 30;
+    };
 
-    let yPos = top + 30;
+    let yPos = drawMaterialesHeader();
+
     materiales.forEach(m => {
+      // salto de página si es necesario
+      if (yPos > 720) {
+        doc.addPage();
+        yPos = drawMaterialesHeader();
+      }
+
+      doc.fontSize(10);
       doc.text(m.descripcion, 50, yPos, { width: 200 });
       doc.text(String(m.cantidad), 250, yPos, { width: 80 });
       doc.text(`$${formatNumber(Number(m.precioUnitario).toFixed(2))}`, 330, yPos, { width: 100 });
       doc.text(`$${formatNumber(Number(m.total).toFixed(2))}`, 430, yPos, { width: 80 });
-      yPos += 20;
+      yPos += 14;
+
+      // línea de detalles adicionales
+      const extraParts = [];
+      if (m.unidadMedida) extraParts.push(`Unidad: ${m.unidadMedida}`);
+      if (!isNaN(Number(m.desperdicio)) && Number(m.desperdicio) > 0) extraParts.push(`Desperdicio: ${Number(m.desperdicio)}%`);
+      if (m.categoria) extraParts.push(`Categoría: ${m.categoria}`);
+      if (m.proveedor) extraParts.push(`Proveedor: ${m.proveedor}`);
+      if (m.notas) extraParts.push(`Notas: ${m.notas}`);
+      if (extraParts.length > 0) {
+        if (yPos > 740) { doc.addPage(); yPos = drawMaterialesHeader(); }
+        doc.fontSize(9).fillColor('gray').text(extraParts.join(' | '), 50, yPos, { width: 480 });
+        doc.fillColor('black');
+        yPos += 12;
+      }
     });
 
     doc.moveTo(50, yPos).lineTo(530, yPos).stroke();
@@ -66,20 +98,41 @@ function generatePdf({ procedimiento, materiales = [], manoDeObra = [], totales 
     doc.fontSize(16).text('Mano de Obra', { underline: true });
     doc.moveDown();
 
-    const top = doc.y; doc.fontSize(10);
-    doc.text('Descripción', 50, top, { width: 200 });
-    doc.text('Cantidad', 250, top, { width: 80 });
-    doc.text('Precio Unitario', 330, top, { width: 100 });
-    doc.text('Total', 430, top, { width: 80 });
-    doc.moveTo(50, top + 20).lineTo(530, top + 20).stroke();
+    const drawManoHeader = () => {
+      const top = doc.y; doc.fontSize(10);
+      doc.text('Descripción', 50, top, { width: 200 });
+      doc.text('Cantidad', 250, top, { width: 80 });
+      doc.text('Precio Unitario', 330, top, { width: 100 });
+      doc.text('Total', 430, top, { width: 80 });
+      doc.moveTo(50, top + 20).lineTo(530, top + 20).stroke();
+      return top + 30;
+    };
 
-    let yPos = top + 30;
+    let yPos = drawManoHeader();
+
     manoDeObra.forEach(item => {
+      if (yPos > 720) { doc.addPage(); yPos = drawManoHeader(); }
+
+      doc.fontSize(10);
       doc.text(item.descripcion, 50, yPos, { width: 200 });
       doc.text(String(item.cantidad), 250, yPos, { width: 80 });
       doc.text(`$${formatNumber(Number(item.precioUnitario).toFixed(2))}`, 330, yPos, { width: 100 });
       doc.text(`$${formatNumber(Number(item.total).toFixed(2))}`, 430, yPos, { width: 80 });
-      yPos += 20;
+      yPos += 14;
+
+      const extraParts = [];
+      if (item.tipoUnidad) extraParts.push(`Tipo: ${item.tipoUnidad}`);
+      if (!isNaN(Number(item.cantidadTrabajadores))) extraParts.push(`Trab: ${Number(item.cantidadTrabajadores)}`);
+      if (!isNaN(Number(item.cantidadUnidades))) extraParts.push(`Unid: ${Number(item.cantidadUnidades)}`);
+      if (!isNaN(Number(item.tarifaPorUnidad)) && item.tipoUnidad !== 'precioFijo') extraParts.push(`Tarifa: $${formatNumber(Number(item.tarifaPorUnidad).toFixed(2))}`);
+      if (!isNaN(Number(item.costoAdicional)) && Number(item.costoAdicional) > 0) extraParts.push(`Adic: $${formatNumber(Number(item.costoAdicional).toFixed(2))}`);
+      if (item.notas) extraParts.push(`Notas: ${item.notas}`);
+      if (extraParts.length > 0) {
+        if (yPos > 740) { doc.addPage(); yPos = drawManoHeader(); }
+        doc.fontSize(9).fillColor('gray').text(extraParts.join(' | '), 50, yPos, { width: 480 });
+        doc.fillColor('black');
+        yPos += 12;
+      }
     });
 
     doc.moveTo(50, yPos).lineTo(530, yPos).stroke();

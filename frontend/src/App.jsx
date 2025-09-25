@@ -10,7 +10,13 @@ function App() {
   const [step, setStep] = useState(0); // 0 = Home, 1-4 = Cotización steps
   const [procedimiento, setProcedimiento] = useState({
     nombre: '',
-    descripcion: ''
+    descripcion: '',
+    ubicacion: '',
+    tiempoEstimado: '',
+    tiempoUnidad: 'días', // días o semanas
+    dependencias: '',
+    prioridad: '',
+    notas: ''
   });
   const [materiales, setMateriales] = useState([]);
   const [manoDeObra, setManoDeObra] = useState([]);
@@ -31,7 +37,13 @@ function App() {
     // Reiniciar el estado
     setProcedimiento({
       nombre: '',
-      descripcion: ''
+      descripcion: '',
+      ubicacion: '',
+      tiempoEstimado: '',
+      tiempoUnidad: 'días',
+      dependencias: '',
+      prioridad: '',
+      notas: ''
     });
     setMateriales([]);
     setManoDeObra([]);

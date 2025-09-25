@@ -17,7 +17,7 @@ const Home = ({ startCotizacion }) => {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/quotes');
+      const response = await fetch('/api/quotes');
       const data = await response.json();
       
       if (!response.ok) {
@@ -117,7 +117,7 @@ const Home = ({ startCotizacion }) => {
                         <td>${parseFloat(cotizacion.total_general).toLocaleString('es-CO')}</td>
                         <td>
                           <a 
-                            href={`http://localhost:5000${cotizacion.pdf_path}`}
+                            href={`${cotizacion.pdf_path}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="btn btn-download"
